@@ -157,6 +157,17 @@ export interface BarcodeScannerPlugin {
    */
   requestPermissions(): Promise<PermissionStatus>;
   /**
+   * Called when a barcode is scanned.
+   *
+   * Only available on Android.
+   *
+   * @since 0.0.1
+   */
+  addListener(
+    eventName: 'barcodeScanned',
+    listenerFunc: (event: BarcodeScannedResultEvent) => void,
+  ): Promise<PluginListenerHandle>;
+  /**
    * Called when barcodes are scanned.
    *
    * @since 6.2.0
@@ -464,6 +475,42 @@ export interface BarcodeScannedEvent {
    * @since 0.0.1
    */
   barcode: Barcode;
+}
+
+/**
+ * @since 0.0.1
+ */
+export interface BarcodeScannedResultEvent {
+  /**
+   * The barcode value in a machine readable format.
+   *
+   * @since 0.0.1
+   */
+  value: string;
+  /**
+   * The barcode format (e.g., 'QR_CODE', 'CODE_128').
+   *
+   * @since 0.0.1
+   */
+  format: string;
+  /**
+   * The engine used for scanning ('MLKIT' or 'ZXING').
+   *
+   * @since 0.0.1
+   */
+  engineUsed: 'MLKIT' | 'ZXING';
+  /**
+   * The four corner points of the barcode in normalized screen-space percentages (0.0-1.0).
+   * Points are in clockwise order starting with top-left.
+   *
+   * @since 0.0.1
+   */
+  cornerPoints: [
+    { x: number; y: number },
+    { x: number; y: number },
+    { x: number; y: number },
+    { x: number; y: number },
+  ];
 }
 
 /**
