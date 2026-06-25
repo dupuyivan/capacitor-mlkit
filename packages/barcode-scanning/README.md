@@ -372,8 +372,30 @@ Start scanning for barcodes.
 
 **Since:** 0.0.1
 
---------------------
+**Example:**
 
+```typescript
+const listener = await BarcodeScanner.addListener('barcodesScanned', (event) => {
+  console.log('scanned barcode', event);
+});
+
+await BarcodeScanner.startScan({
+  formats: ['QR_CODE', 'CODE_128'],
+  lensFacing: 'BACK',
+  scanningRegion: {
+    left: 0.25,
+    top: 0.15,
+    right: 0.75,
+    bottom: 0.85,
+  },
+  manualLowLightMode: true,
+});
+
+// Later
+await BarcodeScanner.stopScan();
+```
+
+--------------------
 
 ### stopScan()
 

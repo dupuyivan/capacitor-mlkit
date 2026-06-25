@@ -79,6 +79,9 @@ public class BarcodeScannerPlugin extends Plugin {
             scanSettings.lensFacing = lensFacing;
             scanSettings.resolution = BarcodeScannerHelper.convertIntegerToResolution(call.getInt("resolution", 1));
 
+            JSObject scanningRegion = call.getObject("scanningRegion");
+            boolean manualLowLightMode = call.getBoolean("manualLowLightMode", false);
+
             boolean granted = implementation.requestCameraPermissionIfNotDetermined(call);
             if (!granted) {
                 return;
@@ -88,6 +91,8 @@ public class BarcodeScannerPlugin extends Plugin {
                 .runOnUiThread(() -> {
                     implementation.startScan(
                         scanSettings,
+                        scanningRegion,
+                        manualLowLightMode,
                         new StartScanResultCallback() {
                             @Override
                             public void success() {

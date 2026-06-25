@@ -19,10 +19,12 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.13.0'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0'
     }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     namespace = "io.capawesome.capacitorjs.plugins.mlkit.barcodescanning"
@@ -47,6 +49,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_21
         targetCompatibility JavaVersion.VERSION_21
     }
+    kotlinOptions {
+        jvmTarget = '21'
+    }
 }
 
 repositories {
@@ -63,9 +68,11 @@ dependencies {
     implementation "androidx.camera:camera-core:$androidxCameraCoreVersion"
     implementation "androidx.camera:camera-lifecycle:$androidxCameraLifecycleVersion"
     implementation "androidx.camera:camera-view:$androidxCameraViewVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.0"
     implementation "com.google.guava:listenablefuture:$listenableFutureVersion"
     implementation "com.google.mlkit:barcode-scanning:$mlkitBarcodeScanningVersion"
     implementation "com.google.android.gms:play-services-code-scanner:$playServicesCodeScannerVersion"
+    implementation "com.google.zxing:core:3.5.0"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"

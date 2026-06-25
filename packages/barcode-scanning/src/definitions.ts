@@ -228,6 +228,28 @@ export interface StartScanOptions {
    */
   resolution?: Resolution;
   /**
+   * A normalized scanning region defined in screen-space percentages.
+   *
+   * Only available on Android.
+   *
+   * @since 0.0.1
+   */
+  scanningRegion?: {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+  };
+  /**
+   * Force the plugin into a low-light capture mode with torch and underexposure.
+   *
+   * Only available on Android.
+   *
+   * @since 0.0.1
+   * @default false
+   */
+  manualLowLightMode?: boolean;
+  /**
    * Allow camera usage on iPad while in multitasking mode.
    *
    * Only available on iOS (16.0+).

@@ -76,12 +76,16 @@ public class BarcodeScanner implements ImageAnalysis.Analyzer {
     @Nullable
     private ModuleInstallProgressListener moduleInstallProgressListener;
 
+    @Nullable
+    private CustomScannerPlugin customScannerPlugin;
+
     private HashMap<String, Integer> barcodeRawValueVotes = new HashMap<String, Integer>();
 
     private boolean isTorchEnabled = false;
 
     public BarcodeScanner(BarcodeScannerPlugin plugin) {
         this.plugin = plugin;
+        this.customScannerPlugin = new CustomScannerPlugin(plugin);
     }
 
     /**
@@ -98,74 +102,26 @@ public class BarcodeScanner implements ImageAnalysis.Analyzer {
     /**
      * Must run on UI thread.
      */
-    public void startScan(ScanSettings scanSettings, StartScanResultCallback callback) {
-        // Stop the camera if running
+    public void startScan(
+        ScanSettings scanSettings,
+        JSObject scanningRegion,
+        boolean manualLowLightMode,
+        StartScanResultCallback callback
+    ) {
         stopScan();
-
-        // Hide WebView background
-        hideWebViewBackground();
-
         this.scanSettings = scanSettings;
-
-        BarcodeScannerOptions options = buildBarcodeScannerOptions(scanSettings);
-        barcodeScannerInstance = BarcodeScanning.getClient(options);
-
-        ResolutionSelector resolutionSelector = new ResolutionSelector.Builder()
-            .setResolutionStrategy(new ResolutionStrategy(scanSettings.resolution, ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER))
-            .build();
-
-        ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .setResolutionSelector(resolutionSelector)
-            .build();
-
-        imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(plugin.getContext()), this);
-
-        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(plugin.getContext());
-        cameraProviderFuture.addListener(
-            () -> {
-                try {
-                    processCameraProvider = cameraProviderFuture.get();
-
-                    CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(this.scanSettings.lensFacing).build();
-
-                    previewView = new PreviewView(plugin.getActivity());
-                    previewView.setLayoutParams(
-                        new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
-                    );
-                    previewView.setScaleType(PreviewView.ScaleType.FILL_CENTER);
-                    previewView.setBackgroundColor(Color.BLACK);
-
-                    // Add preview view behind the WebView
-                    ((ViewGroup) plugin.getBridge().getWebView().getParent()).addView(previewView, 0);
-
-                    Preview preview = new Preview.Builder().build();
-                    preview.setSurfaceProvider(previewView.getSurfaceProvider());
-
-                    // Start the camera
-                    camera = processCameraProvider.bindToLifecycle(
-                        (LifecycleOwner) plugin.getContext(),
-                        cameraSelector,
-                        preview,
-                        imageAnalysis
-                    );
-
-                    callback.success();
-                } catch (Exception exception) {
-                    callback.error(exception);
-                }
-            },
-            ContextCompat.getMainExecutor(plugin.getContext())
-        );
+        customScannerPlugin.startScan(scanSettings, scanningRegion, manualLowLightMode, callback);
     }
 
     /**
      * Must run on UI thread.
      */
     public void stopScan() {
+        if (customScannerPlugin != null) {
+            customScannerPlugin.stopScan();
+        }
         showWebViewBackground();
         disableTorch();
-        // Stop the camera
         if (processCameraProvider != null) {
             processCameraProvider.unbindAll();
         }
